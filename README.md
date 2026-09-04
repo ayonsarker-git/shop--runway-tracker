@@ -1,39 +1,32 @@
 # Shop Cash-Runway Tracker
 
-> A lightweight financial runway predictor & stress-testing engine built for local retail shops.
-
-## 🎯 Problem
-ক্ষুদ্র ও মাঝারি দোকানের মালিকরা সাধারণত দিনশেষে ক্যাশবাক্সে নগদ টাকা দেখে ভাবেন ব্যবসা ভালো চলছে। কিন্তু মাসের শেষে যখন হঠাৎ দোকান ভাড়া, কর্মচারীর বেতন বা মহাজনের বকেয়া পরিশোধ করতে হয়, তখন আকস্মিক ক্যাশ ক্রাইসিস তৈরি হয়। অ্যাকাউন্টিংয়ের খাতায় লাভ দেখানো সত্ত্বেও শুধুমাত্র ক্যাশ ফ্লো এবং বার্ন রেট ট্র্যাক না করার কারণে অনেক সম্ভাবনাময় দোকান বন্ধ হয়ে যায়।
-
-## 💡 What it measures
-এই টুলটি জটিল অ্যাকাউন্টিং পরিহার করে দোকানদারকে একটি সুনির্দিষ্ট অ্যাকশনেবল সংখ্যা দেয়: *"বর্তমান খরচের ট্রেন্ড অনুযায়ী আমার হাতের নগদ টাকায় দোকান আর কতদিন চলবে?"* এটি রোলিং অ্যাভারেজের মাধ্যমে আকস্মিক খরচের নয়েজ দূর করে প্রকৃত বার্ন রেট বের করে এবং বিক্রি ২০%-৫০% কমে গেলে রানওয়ে কতদিনে নামবে তা সিমুলেট করে আগাম সতর্কতা দেয়।
+> A lightweight, zero-dependency financial runway predictor and revenue-drop stress-testing engine built for local retail MSMEs.
 
 ---
 
-## 🗺️ Project Architecture & Roadmap
-
-- [x] **Phase 0: Setup & Skeleton**
-  - Git repository, `.gitignore` (Python standards), directory structure, and initial sync.
-- [x] **Phase 1: Data Layer (`models.py`, `storage.py`)**
-  - Single Responsibility Principle (SRP): decoupled data contracts from persistence.
-  - `Entry` & `ShopConfig` models with serialization logic.
-  - File-based JSON persistence engine.
-- [ ] **Phase 2: Core Financial Logic (`runway.py`)**
-  - Pure, side-effect-free financial calculation functions.
-  - 7-day rolling average burn rate to filter out sudden expense spikes.
-  - Zero-division prevention for profitable states (`Runway: Infinite/Profitable`).
-  - Stress-testing engine for parameterized revenue drops (20%, 30%, 50%).
-- [ ] **Phase 3: Automated Testing (`tests/test_runway.py`)**
-  - Unit tests for edge cases: break-even, profitable shops, negative burn.
-  - Testing stress-test simulations before touching any user interface.
-- [ ] **Phase 4: User Interface (`main.py`)**
-  - Frictionless CLI menu for daily shop entries.
-  - Date localization adapter (`DD-MM-YYYY` for retail users).
-  - Terminal alert badges (Runway < 15 days warning).
-- [ ] **Phase 5: Technical Deep-Dive & Trade-offs**
-  - Documenting architectural trade-offs: Flat expenses vs COGS, JSON vs SQLite.
+## 🎯 Problem Statement
+ক্ষুদ্র ও মাঝারি দোকানের মালিকরা সাধারণত ক্যাশবাক্সের বর্তমান নগদ ব্যালেন্স দেখে ব্যবসার স্বাস্থ্য নির্ধারণ করেন। অ্যাকাউন্টিংয়ের খাতায় লাভ দেখানো সত্ত্বেও আকস্মিক বড় খরচ (দোকান ভাড়া, কর্মচারী বেতন, মহাজনের বকেয়া) আসার সময় লিকুইডিটি ক্রাইসিস তৈরি হয়। ক্যাশ-ইনফ্লো এবং আউটফ্লোর মধ্যে সময়ের অমিলের কারণে অনেক সম্ভাবনাময় ব্যবসা অকালে বন্ধ হয়ে যায়।
 
 ---
 
-## ⚙️ Design Decisions
-*(Detailed write-ups will be added upon Phase 5 completion)*
+## 💡 What it Measures
+* **Rolling Daily Burn Rate:** যেকোনো আকস্মিক একক বড় খরচের প্রভাবকে স্বাভাবিক করতে ৭ দিনের মুভিং নেট ক্যাশ ফ্লো ($Income - Expense$) হিসাব করে।
+* **Cash Runway (in Days):** বর্তমান রিজার্ভ ক্যাশ দিয়ে কোনো বাড়তি সেলস ছাড়াই বর্তমান খরচে দোকান আর ঠিক কতদিন টিকে থাকতে পারবে ($Reserve \div Daily\ Burn$) তা প্রজেক্ট করে।
+* **Early Warning Indicator:** রানওয়ে ১৫ দিনের নিচে নামলে টার্মিনালে স্বয়ংক্রিয় বিপদসংকেত ট্রিগার করে।
+* **Stress-Testing Engine:** অর্থনৈতিক মন্দা বা পাইকারি সাপ্লাই ডিসরাপশনের কারণে বিক্রি ২০%, ৩০% বা ৫০% কমে গেলে রানওয়ে কত দ্রুত ড্রপ করবে তার রিয়েল-টাইম হোয়াট-ইফ সিমুলেশন।
+
+---
+
+## 🗺️ Project Architecture & Status
+
+```text
+shop-runway-tracker/
+├── data/               # Persistent JSON storage (ignored by Git)
+├── models.py           # Domain Data Contracts (Entry, ShopConfig)
+├── storage.py          # Persistence Engine (File I/O & Serialization)
+├── runway.py           # Pure Financial Calculation & Stress-Test Logic
+├── main.py             # CLI Presentation Layer & Localization Adapter
+├── tests/
+│   └── test_runway.py  # Automated Unit Test Suite
+├── .gitignore
+└── README.md
